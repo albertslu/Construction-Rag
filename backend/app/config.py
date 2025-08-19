@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-large"
     openai_embedding_dim: int = 3072
+    openai_temperature: float = 0.1
 
     # Pinecone
     pinecone_api_key: str | None = None

@@ -19,7 +19,7 @@ class RAGService:
         self.llm = ChatOpenAI(
             api_key=settings.openai_api_key,
             model=settings.openai_model,
-            temperature=0.2,
+            temperature=settings.openai_temperature,
         )
 
         # Vector store will connect to existing Pinecone index
