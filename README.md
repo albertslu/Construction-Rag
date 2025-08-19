@@ -1,6 +1,6 @@
-## Construction-RAG
+## Construction-RAG (Backend)
 
-RAG service for answering questions about architectural drawings using FastAPI, LangChain, Pinecone, and Supabase.
+RAG service (backend) for answering questions about architectural drawings using FastAPI, LangChain, Pinecone, and Supabase.
 
 ### Prerequisites
 - Python 3.10+
@@ -13,7 +13,7 @@ RAG service for answering questions about architectural drawings using FastAPI, 
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
 Create a `.env` with your keys:
@@ -41,18 +41,18 @@ DATA_DIR=data/raw
 
 ### Initialize Pinecone Index
 ```bash
-python -m app.ingest.init_pinecone
+python -m backend.app.ingest.init_pinecone
 ```
 
 ### Ingest Documents
-Place PDFs in `data/raw/`.
+Place PDFs in `backend/data/raw/`.
 ```bash
-python -m app.ingest.ingest --data_dir data/raw --namespace default
+python -m backend.app.ingest.ingest --data_dir backend/data/raw --namespace default
 ```
 
 ### Run API
 ```bash
-uvicorn app.main:app --reload --port 8000
+uvicorn backend.app.main:app --reload --port 8000
 ```
 
 - Health: GET `/healthz`
