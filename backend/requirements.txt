@@ -1,0 +1,31 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.0
+
+# LangChain core + integrations
+langchain==0.2.6
+langchain-openai==0.1.13
+langchain-pinecone==0.1.1
+langchain-community==0.2.6
+langchain-text-splitters==0.2.2
+
+# Vector DB (compatible with langchain-pinecone 0.1.1)
+pinecone-client==3.2.2
+
+# Embeddings / tokenization
+tiktoken==0.7.0
+
+# PDF loading
+pypdf==4.3.1
+
+# Env & config
+python-dotenv==1.0.1
+pydantic==2.8.2
+pydantic-settings==2.4.0
+
+# Supabase (Postgres + storage/auth)
+supabase==2.5.1
+
+# Utilities
+requests==2.32.3
+tenacity==8.5.0
+
