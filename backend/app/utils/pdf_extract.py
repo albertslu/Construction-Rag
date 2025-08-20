@@ -44,7 +44,7 @@ def extract_documents_from_pdf(
                             "path": pdf_path,
                             "source": pdf_path.split("/")[-1],
                             "page": page_index,
-                            "bbox": [x0, y0, x1, y1],
+                            "bbox": f"{x0:.1f},{y0:.1f},{x1:.1f},{y1:.1f}",
                         },
                     )
                 )
