@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .routers.chat import router as chat_router
 from .routers.upload import router as upload_router
+from .routers.pdf import router as pdf_router
 
 
 def create_app() -> FastAPI:
@@ -33,6 +34,7 @@ def create_app() -> FastAPI:
 
     app.include_router(chat_router)
     app.include_router(upload_router)
+    app.include_router(pdf_router)
     return app
 
 

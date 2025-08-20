@@ -21,12 +21,21 @@ class ChatRequest(BaseModel):
     conversation_history: Optional[List[Dict[str, str]]] = None
 
 
+class BoundingBox(BaseModel):
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+
+
 class Source(BaseModel):
     id: str
     score: float
     metadata: dict
     drawing_name: Optional[str] = None
     page_number: Optional[int] = None
+    bbox: Optional[BoundingBox] = None
+    text_content: Optional[str] = None
 
 
 class ChatResponse(BaseModel):
@@ -65,12 +74,25 @@ async def chat(req: ChatRequest):
         
         enhanced_sources = []
         for s in sources:
+            # Parse bbox coordinates if available
+            bbox = None
+            bbox_str = s["metadata"].get("bbox")
+            if bbox_str and isinstance(bbox_str, str):
+                try:
+                    coords = [float(x) for x in bbox_str.split(",")]
+                    if len(coords) == 4:
+                        bbox = BoundingBox(x0=coords[0], y0=coords[1], x1=coords[2], y1=coords[3])
+                except (ValueError, IndexError):
+                    bbox = None
+            
             enhanced_sources.append(Source(
                 id=s["id"], 
                 score=s["score"], 
                 metadata=s["metadata"],
                 drawing_name=s["metadata"].get("source", "").replace(".pdf", ""),
-                page_number=int(s["metadata"].get("page", 0)) if s["metadata"].get("page") is not None else None
+                page_number=int(s["metadata"].get("page", 0)) if s["metadata"].get("page") is not None else None,
+                bbox=bbox,
+                text_content=s.get("text_content")
             ))
         
         return ChatResponse(

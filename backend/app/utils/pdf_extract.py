@@ -56,6 +56,8 @@ def extract_documents_from_pdf(
                 text = pytesseract.image_to_string(img)
                 text = text.strip()
                 if len(text) >= min_block_chars:
+                    # For OCR, use full page as bounding box
+                    page_rect = page.rect
                     documents.append(
                         Document(
                             page_content=text,
@@ -63,6 +65,7 @@ def extract_documents_from_pdf(
                                 "path": pdf_path,
                                 "source": pdf_path.split("/")[-1],
                                 "page": page_index,
+                                "bbox": f"{page_rect.x0:.1f},{page_rect.y0:.1f},{page_rect.x1:.1f},{page_rect.y1:.1f}",
                                 "ocr": True,
                             },
                         )

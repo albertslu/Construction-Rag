@@ -126,6 +126,7 @@ class RAGService:
                 "id": metadata.get("id") or metadata.get("source") or metadata.get("path", "unknown"),
                 "score": metadata.get("_distance", 0.0) or metadata.get("score", 0.0),
                 "metadata": metadata,
+                "text_content": d.page_content,  # Include the actual text content
             })
 
         return answer, sources
