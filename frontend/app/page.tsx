@@ -7,6 +7,14 @@ type ChatMessage = {
   content: string; 
   attachments?: { name: string; size: number }[];
   processing?: boolean;
+  // RAG metadata
+  confidence?: "high" | "medium" | "low";
+  drawings_referenced?: string[];
+  sources?: Array<{
+    drawing_name: string;
+    page_number: number;
+    score: number;
+  }>;
 };
 
 export default function Home() {
@@ -25,17 +33,43 @@ export default function Home() {
     const next = [...messages, { role: "user", content: trimmed } as ChatMessage];
     setMessages(next);
     setInput("");
+    
+    // Build conversation history (last 10 messages, excluding attachments for API)
+    const conversationHistory = messages.slice(-10).map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+    
     const res = await fetch(`${apiBase}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: trimmed, top_k: 6, namespace }),
+      body: JSON.stringify({ 
+        query: trimmed, 
+        top_k: 6, 
+        namespace,
+        conversation_history: conversationHistory
+      }),
     });
     if (!res.ok) {
       setMessages([...next, { role: "assistant", content: `Error: ${res.status}` }]);
       return;
     }
     const data = await res.json();
-    setMessages([...next, { role: "assistant", content: data.answer }]);
+    
+    // Extract RAG metadata for drawing highlighting
+    const assistantMessage: ChatMessage = {
+      role: "assistant",
+      content: data.answer,
+      confidence: data.confidence,
+      drawings_referenced: data.drawings_referenced,
+      sources: data.sources?.map((s: any) => ({
+        drawing_name: s.drawing_name,
+        page_number: s.page_number,
+        score: s.score,
+      })),
+    };
+    
+    setMessages([...next, assistantMessage]);
   }
 
   async function sendMessage() {
@@ -136,7 +170,63 @@ export default function Home() {
                       <span>{m.content}</span>
                     </div>
                   ) : (
-                    m.content
+                    <>
+                      {m.content}
+                      {/* Drawing Highlighting for Assistant Messages */}
+                      {m.role === "assistant" && (m.drawings_referenced || m.confidence || m.sources) && (
+                        <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
+                          {/* Confidence Badge */}
+                          {m.confidence && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium">Confidence:</span>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                m.confidence === "high" ? "bg-green-100 text-green-800" :
+                                m.confidence === "medium" ? "bg-yellow-100 text-yellow-800" :
+                                "bg-red-100 text-red-800"
+                              }`}>
+                                {m.confidence.toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Referenced Drawings */}
+                          {m.drawings_referenced && m.drawings_referenced.length > 0 && (
+                            <div>
+                              <span className="text-xs font-medium">Referenced Drawings:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {m.drawings_referenced.map((drawing, idx) => (
+                                  <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                                    📋 {drawing}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Source Details */}
+                          {m.sources && m.sources.length > 0 && (
+                            <div>
+                              <span className="text-xs font-medium">Sources:</span>
+                              <div className="space-y-1 mt-1">
+                                {m.sources.slice(0, 3).map((source, idx) => (
+                                  <div key={idx} className="flex items-center gap-2 text-xs">
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    <span className="font-medium">{source.drawing_name}</span>
+                                    <span className="text-gray-500">Page {source.page_number}</span>
+                                    <span className="text-gray-400">({(source.score * 100).toFixed(0)}% match)</span>
+                                  </div>
+                                ))}
+                                {m.sources.length > 3 && (
+                                  <div className="text-xs text-gray-500">
+                                    +{m.sources.length - 3} more sources
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
