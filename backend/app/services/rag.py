@@ -27,6 +27,7 @@ class RAGService:
             index_name=settings.pinecone_index_name,
             embedding=self.embeddings,
             namespace=settings.pinecone_namespace,
+            pinecone_api_key=settings.pinecone_api_key,
         )
 
         self.splitter = RecursiveCharacterTextSplitter(
@@ -45,6 +46,7 @@ class RAGService:
                 index_name=settings.pinecone_index_name,
                 embedding=self.embeddings,
                 namespace=namespace,
+                pinecone_api_key=settings.pinecone_api_key,
             )
 
         retriever = vectorstore.as_retriever(search_kwargs={"k": top_k})
