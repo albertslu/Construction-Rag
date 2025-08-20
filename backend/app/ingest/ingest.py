@@ -2,10 +2,10 @@ import argparse
 import os
 from typing import List
 
-from langchain_community.document_loaders import PyPDFLoader
 from langchain.schema import Document
 
 from ..services.rag import RAGService
+from ..utils.pdf_extract import extract_documents_from_pdf
 from ..config import settings
 
 
@@ -15,9 +15,7 @@ def load_pdfs_from_dir(directory: str) -> List[Document]:
         for f in files:
             if f.lower().endswith(".pdf"):
                 path = os.path.join(root, f)
-                loader = PyPDFLoader(path)
-                docs = loader.load()
-                # Attach some base metadata
+                docs = extract_documents_from_pdf(path, ocr_fallback=True, ocr_dpi=300)
                 for d in docs:
                     d.metadata = {**(d.metadata or {}), "path": path, "source": os.path.basename(path)}
                 documents.extend(docs)

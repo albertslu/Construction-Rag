@@ -15,6 +15,7 @@ import pytesseract
 from langchain_pinecone import PineconeVectorStore
 
 from ..services.rag import RAGService
+from ..utils.pdf_extract import extract_documents_from_pdf
 from ..config import settings
 
 
@@ -58,34 +59,12 @@ async def upload_pdfs(
         total_docs = 0
         all_chunks = []
         for path in saved_paths:
-            # Try text extraction first
-            loader = PyPDFLoader(path)
-            docs = loader.load()
+            docs = extract_documents_from_pdf(path, ocr_fallback=True, ocr_dpi=300)
             for d in docs:
                 d.metadata = {**(d.metadata or {}), "path": path, "source": os.path.basename(path)}
             total_docs += len(docs)
             chunks = rag.split_documents(docs)
             all_chunks.extend(chunks)
-
-            # If no chunks, fall back to OCR for scanned PDFs
-            if len(chunks) == 0:
-                ocr_docs: list[Document] = []
-                with fitz.open(path) as pdf:
-                    for page_index in range(len(pdf)):
-                        page = pdf[page_index]
-                        pix = page.get_pixmap(dpi=200)
-                        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                        text = pytesseract.image_to_string(img)
-                        text = text.strip()
-                        if not text:
-                            continue
-                        ocr_docs.append(
-                            Document(page_content=text, metadata={"path": path, "source": os.path.basename(path), "page": page_index})
-                        )
-                if ocr_docs:
-                    total_docs += len(ocr_docs)
-                    ocr_chunks = rag.split_documents(ocr_docs)
-                    all_chunks.extend(ocr_chunks)
 
         if not all_chunks:
             raise HTTPException(status_code=400, detail="No content extracted from PDFs")

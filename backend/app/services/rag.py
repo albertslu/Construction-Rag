@@ -31,8 +31,8 @@ class RAGService:
         )
 
         self.splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1200,
-            chunk_overlap=150,
+            chunk_size=500,
+            chunk_overlap=50,
             separators=["\n\n", "\n", ". ", ".", " "]
         )
 
