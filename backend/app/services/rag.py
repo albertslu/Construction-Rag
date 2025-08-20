@@ -8,6 +8,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
 from ..config import settings
+from ..utils.construction_validation import construction_validator
 
 
 class RAGService:
@@ -129,5 +130,10 @@ class RAGService:
                 "text_content": d.page_content,  # Include the actual text content
             })
 
-        return answer, sources
+        # Apply construction validation and safety checks
+        enhanced_answer, confidence_override = construction_validator.enhance_response_with_validation(
+            query, answer, sources
+        )
+
+        return enhanced_answer, sources, confidence_override
 

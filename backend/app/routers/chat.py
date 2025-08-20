@@ -55,7 +55,7 @@ async def chat(req: ChatRequest):
         if rag_service is None:
             rag_service = RAGService()
         namespace = req.namespace or settings.pinecone_namespace
-        answer, sources = rag_service.answer_query(
+        answer, sources, confidence_override = rag_service.answer_query(
             query=req.query, 
             top_k=req.top_k, 
             namespace=namespace,
@@ -68,9 +68,12 @@ async def chat(req: ChatRequest):
             for s in sources if s["metadata"].get("source")
         ]))
         
-        # Simple confidence scoring based on source scores and count
-        avg_score = sum(s["score"] for s in sources) / len(sources) if sources else 0
-        confidence = "high" if avg_score < 0.3 and len(sources) >= 3 else "medium" if avg_score < 0.5 else "low"
+        # Use construction validator confidence override if provided, otherwise use simple scoring
+        if confidence_override:
+            confidence = confidence_override
+        else:
+            avg_score = sum(s["score"] for s in sources) / len(sources) if sources else 0
+            confidence = "high" if avg_score < 0.3 and len(sources) >= 3 else "medium" if avg_score < 0.5 else "low"
         
         enhanced_sources = []
         for s in sources:
