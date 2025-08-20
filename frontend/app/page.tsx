@@ -13,17 +13,16 @@ export default function Home() {
 
   const apiBase = useMemo(() => process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000", []);
 
-  async function sendMessage() {
-    const query = input.trim();
-    if (!query) return;
-    const next = [...messages, { role: "user", content: query } as ChatMessage];
+  async function sendQuery(query: string) {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    const next = [...messages, { role: "user", content: trimmed } as ChatMessage];
     setMessages(next);
     setInput("");
-
     const res = await fetch(`${apiBase}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, top_k: 6, namespace }),
+      body: JSON.stringify({ query: trimmed, top_k: 6, namespace }),
     });
     if (!res.ok) {
       setMessages([...next, { role: "assistant", content: `Error: ${res.status}` }]);
@@ -33,7 +32,16 @@ export default function Home() {
     setMessages([...next, { role: "assistant", content: data.answer }]);
   }
 
-  async function onUpload(files: FileList | null) {
+  async function sendMessage() {
+    const selected = fileInputRef.current?.files;
+    const question = input;
+    if (selected && selected.length > 0) {
+      await onUpload(selected, true);
+    }
+    await sendQuery(question);
+  }
+
+  async function onUpload(files: FileList | null, silent: boolean = false) {
     if (!files || files.length === 0) return;
     setUploading(true);
     try {
@@ -42,14 +50,19 @@ export default function Home() {
       form.append("namespace", namespace);
       const res = await fetch(`${apiBase}/upload`, { method: "POST", body: form });
       if (!res.ok) {
-        alert(`Upload failed: ${res.status}`);
+        if (!silent) alert(`Upload failed: ${res.status}`);
         return;
       }
       const data = await res.json();
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: `Ingested ${data.files_ingested} files, ${data.chunks_indexed} chunks into namespace '${data.namespace}'.` },
-      ]);
+      if (!silent) {
+        setMessages((m) => [
+          ...m,
+          { role: "assistant", content: `Ingested ${data.files_ingested} files, ${data.chunks_indexed} chunks into namespace '${data.namespace}'.` },
+        ]);
+        if (input.trim()) {
+          await sendQuery(input);
+        }
+      }
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
