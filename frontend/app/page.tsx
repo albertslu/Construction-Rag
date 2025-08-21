@@ -62,7 +62,7 @@ export default function Home() {
       content: data.answer,
       confidence: data.confidence,
       drawings_referenced: data.drawings_referenced,
-      sources: data.sources?.map((s: any) => ({
+      sources: data.sources?.map((s: { drawing_name?: string; page_number?: number; score?: number }) => ({
         drawing_name: s.drawing_name,
         page_number: s.page_number,
         score: s.score,
