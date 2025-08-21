@@ -58,3 +58,4 @@ uvicorn backend.app.main:app --reload --port 8000
 - Health: GET `/healthz`
 - Chat: POST `/chat` with body `{ "query": "...", "top_k": 6, "namespace": "default" }`
 
+next
