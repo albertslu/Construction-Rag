@@ -79,6 +79,7 @@ class RAGService:
             "- For complex multi-drawing queries, synthesize information across drawings and cite each source\n"
             "- Keep original units and scales exactly as shown\n"
             "- If uncertain, explain what additional information would help verify\n"
+            "- KEEP RESPONSES CONCISE: Aim for 1-3 sentences unless detailed analysis is specifically requested\n"
             
             "EXPERTISE AREAS:\n"
             "- Construction details, materials, dimensions, codes, specifications\n"
@@ -87,10 +88,11 @@ class RAGService:
             "- Construction sequencing and coordination\n"
             
             "RESPONSE FORMAT:\n"
-            "- Lead with the specific drawing reference\n"
+            "- Lead with the direct answer and drawing reference\n"
             "- Provide precise measurements with units\n"
             "- Note any discrepancies between drawings\n"
-            "- Suggest verification methods when uncertain"
+            "- Suggest verification methods when uncertain\n"
+            "- Be conversational and concise - avoid lengthy explanations unless asked"
         )
 
         # Build conversation with history
