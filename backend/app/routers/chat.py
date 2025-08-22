@@ -45,7 +45,7 @@ class ChatResponse(BaseModel):
     drawings_referenced: List[str] = []
 
 
-rag_service: RAGService | None = None
+rag_service: Optional[RAGService] = None
 
 
 @router.post("/chat", response_model=ChatResponse)
