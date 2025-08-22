@@ -44,7 +44,7 @@ class RAGService:
         self, 
         query: str, 
         top_k: int = 6, 
-        namespace: str | None = None,
+        namespace: Optional[str] = None,
         conversation_history: Optional[List[Dict[str, str]]] = None
     ) -> Tuple[str, List[Dict[str, Any]]]:
         vectorstore = self.vectorstore

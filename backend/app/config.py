@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,14 +17,14 @@ class Settings(BaseSettings):
     docs_enabled: bool = True
 
     # OpenAI
-    openai_api_key: str | None = None
+    openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-large"
     openai_embedding_dim: int = 3072
     openai_temperature: float = 0.1
 
     # Pinecone
-    pinecone_api_key: str | None = None
+    pinecone_api_key: Optional[str] = None
     pinecone_index_name: str = "construction-rag"
     pinecone_cloud: str = "aws"
     pinecone_region: str = "us-east-1"
@@ -31,9 +32,9 @@ class Settings(BaseSettings):
     pinecone_namespace: str = "default"
 
     # Supabase
-    supabase_url: str | None = None
-    supabase_anon_key: str | None = None
-    supabase_service_role_key: str | None = None
+    supabase_url: Optional[str] = None
+    supabase_anon_key: Optional[str] = None
+    supabase_service_role_key: Optional[str] = None
 
     # Data
     data_dir: str = "data/raw"
