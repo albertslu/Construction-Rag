@@ -6,6 +6,7 @@ import tempfile
 from typing import List, Optional
 
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.schema import Document
@@ -20,6 +21,18 @@ from ..config import settings
 
 
 router = APIRouter(prefix="", tags=["upload"])
+
+
+@router.options("/upload")
+async def upload_options():
+    return Response(
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Credentials": "true",
+        }
+    )
 
 
 class UploadResponse(BaseModel):
